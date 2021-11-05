@@ -1,0 +1,37 @@
+
+
+        Access tokens are issued to third-party clients by an authorization server with the approval of the resource owner. 
+        The client uses the access token to access the protected resources hosted by the resource server.
+        
+        
+        Refresh Tokens are credentials used to obtain access tokens.
+        Refresh tokens are issued to the client by the authorization server and are used to obtain a new access token 
+        when the current access token becomes invalid or expires, or to obtain additional access tokens with identical or narrower scope.
+
+Code :
+
+  Future<User> getUser({var token , var refresh_token}) async {
+
+    http.Response response =
+    await http.post(Uri.https(EndPoints.basicUrl, '/api/user',),
+        headers: {'Authorization': 'Bearer $token'}
+        );
+
+    if(response.statusCode == 200){
+      return User.fromJSON(
+          jsonDecode(response.body)['user']);
+    }
+    else if(response.statusCode == 401){
+      //refresh token and call getUser again
+      http.Response response = await http.post(Uri.https( EndPoints.basicUrl,
+          '/api/[YourAuthorizationEndpoint]'),
+          headers: {'grant_type': 'refresh_token', 'refresh_token': '$refresh_token'});
+      return User.fromJSON(
+          jsonDecode(response.body)['user']);
+      // token = jsonDecode(response.body)['token'];
+      // refresh_token = jsonDecode(response.body)['refresh_token'];
+      // return getUser();
+    }
+
+  }
+
